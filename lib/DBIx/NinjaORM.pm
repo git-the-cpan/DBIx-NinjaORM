@@ -1,5 +1,7 @@
 package DBIx::NinjaORM;
 
+use 5.010;
+
 use warnings;
 use strict;
 
@@ -19,11 +21,11 @@ DBIx::NinjaORM - Flexible Perl ORM for easy transitions from inline SQL to objec
 
 =head1 VERSION
 
-Version 2.1.0
+Version 2.1.1
 
 =cut
 
-our $VERSION = '2.1.0';
+our $VERSION = '2.1.1';
 
 
 =head1 DESCRIPTION
@@ -255,7 +257,6 @@ sub commit
 	
 	if ( defined( $self->id() ) )
 	{
-		
 		my $primary_key_name = $self->get_primary_key_name();
 		delete( $data->{ $primary_key_name } )
 			if exists( $data->{ $primary_key_name } );
