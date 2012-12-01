@@ -21,11 +21,11 @@ DBIx::NinjaORM - Flexible Perl ORM for easy transitions from inline SQL to objec
 
 =head1 VERSION
 
-Version 2.1.1
+Version 2.1.2
 
 =cut
 
-our $VERSION = '2.1.1';
+our $VERSION = '2.1.2';
 
 
 =head1 DESCRIPTION
@@ -549,6 +549,10 @@ sub new
 {
 	my ( $class, $filters, %args ) = @_;
 	
+	# If filters exist, they need to be a hashref.
+	croak 'The first argument must be a hashref containing filtering criteria'
+		if defined( $filters ) && !Data::Validate::Type::is_hashref( $filters );
+	
 	# Check if we have a unique identifier passed.
 	# Note: passing an ID is a subcase of passing field defined as unique, but
 	# unique_fields() doesn't include the primary key name.
@@ -640,7 +644,7 @@ sub remove
 	croak "Missing primary key name for class '$class', cannot delete safely"
 		if !defined( $primary_key_name );
 	
-	croak "The object of class '$class' does not have a primary key value, cannot update"
+	croak "The object of class '$class' does not have a primary key value, cannot delete"
 		if ! defined( $self->id() );
 	
 	# Allow using a different DB handle.
@@ -726,9 +730,10 @@ sub retrieve_list_nocache ## no critic (Subroutines::ProhibitExcessComplexity)
 		$filtering_field_keys_passed = $filtering_criteria->[2];
 	}
 	
-	# Make sure there's at least one argument.
+	# Make sure there's at least one argument, unless allow_all=1 or there is
+	# custom where clauses.
 	croak 'At least one argument must be passed'
-		if !$args{'allow_all'} && !$filtering_field_keys_passed;
+		if !$args{'allow_all'} && !$filtering_field_keys_passed && scalar( @$where_clauses ) == 0;
 	
 	# Prepare the ORDER BY.
 	my $table_name = $class->get_table_name();
@@ -2810,7 +2815,7 @@ sub parse_filtering_criteria
 	my $where_clauses = [];
 	my $where_values = [];
 	my $filtering_field_keys_passed = 0;
-	foreach my $field ( keys %$filters )
+	foreach my $field ( sort keys %$filters )
 	{
 		next unless defined( $filters->{ $field } );
 		$filtering_field_keys_passed = 1;
