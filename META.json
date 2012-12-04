@@ -41,6 +41,7 @@
             "Data::Dumper" : "0",
             "Data::Validate::Type" : "0",
             "Digest::SHA1" : "0",
+            "Log::Any" : "0",
             "MIME::Base64" : "0",
             "Storable" : "0",
             "perl" : "5.01"
@@ -50,7 +51,7 @@
    "provides" : {
       "DBIx::NinjaORM" : {
          "file" : "lib/DBIx/NinjaORM.pm",
-         "version" : "v2.2.1"
+         "version" : "v2.3.0"
       }
    },
    "release_status" : "stable",
@@ -66,5 +67,5 @@
          "url" : "https://github.com/guillaumeaubert/DBIx-NinjaORM"
       }
    },
-   "version" : "v2.2.1"
+   "version" : "v2.3.0"
 }
