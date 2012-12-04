@@ -21,11 +21,11 @@ DBIx::NinjaORM - Flexible Perl ORM for easy transitions from inline SQL to objec
 
 =head1 VERSION
 
-Version 2.1.3
+Version 2.2.0
 
 =cut
 
-our $VERSION = '2.1.3';
+our $VERSION = '2.2.0';
 
 
 =head1 DESCRIPTION
@@ -2250,7 +2250,7 @@ sub get_object_cache_key
 			carp(
 				"Cache miss for unique field >$unique_field< and value >$value< on table "
 				. ">$table_name<, cannot generate cache key."
-			);
+			) if $self->is_verbose();
 			return;
 		}
 	}
@@ -2620,21 +2620,35 @@ C<static_class_info()>, and return it.
 	my $dbh = $class->assert_dbh( $custom_dbh );
 	my $dbh = $object->assert_dbh( $custom_dbh );
 
+Note that this method also supports coderefs that return a C<DBI::db> object
+when evaluated. That way, if no database connection is needed when running the
+code, no connection needs to be established.
+
 =cut
 
 sub assert_dbh
 {
-	my ( $class, $dbh ) = @_;
+	my ( $class, $specific_dbh ) = @_;
 	
-	if ( defined( $dbh ) )
+	my ( $dbh, $type );
+	if ( defined( $specific_dbh ) )
 	{
-		croak 'The database handle specified is not valid (' . ref( $dbh ) . ')'
-			if !Data::Validate::Type::is_instance( $dbh, class => 'DBI::db' );
-		
-		return $dbh;
+		$dbh = $specific_dbh;
+		$type = 'specified';
+	}
+	else
+	{
+		$dbh = $class->get_default_dbh();
+		$type = 'default';
 	}
 	
-	return $class->get_default_dbh();
+	$dbh = $dbh->()
+		if Data::Validate::Type::is_coderef( $dbh );
+	
+	croak "The $type database handle is not a valid DBI::db object (" . ref( $dbh ) . ')'
+		if !Data::Validate::Type::is_instance( $dbh, class => 'DBI::db' );
+	
+	return $dbh;
 }
 
 
