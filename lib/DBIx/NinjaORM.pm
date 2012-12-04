@@ -21,11 +21,11 @@ DBIx::NinjaORM - Flexible Perl ORM for easy transitions from inline SQL to objec
 
 =head1 VERSION
 
-Version 2.2.0
+Version 2.2.1
 
 =cut
 
-our $VERSION = '2.2.0';
+our $VERSION = '2.2.1';
 
 
 =head1 DESCRIPTION
@@ -804,8 +804,8 @@ sub retrieve_list_nocache ## no critic (Subroutines::ProhibitExcessComplexity)
 			: 1;
 		
 		# Set LIMIT and OFFSET.
-		$limit = 'LIMIT ' . ( ( $pagination_info->{'page'} - 1 ) * $pagination_info->{'per_page'} )
-			. ', ' . $pagination_info->{'per_page'};
+		$limit = "LIMIT $pagination_info->{'per_page'} "
+			. 'OFFSET ' . ( ( $pagination_info->{'page'} - 1 ) * $pagination_info->{'per_page'} );
 	}
 	
 	# If we need to lock the rows and there's joins, let's do this in two steps:
