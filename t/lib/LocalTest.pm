@@ -17,11 +17,11 @@ LocalTest - Test functions for L<DBIx::NinjaORM>.
 
 =head1 VERSION
 
-Version 2.3.0
+Version 2.3.1
 
 =cut
 
-our $VERSION = '2.3.0';
+our $VERSION = '2.3.1';
 
 
 =head1 SYNOPSIS
@@ -240,7 +240,7 @@ L<http://search.cpan.org/dist/DBIx-NinjaORM/>
 
 =head1 COPYRIGHT & LICENSE
 
-Copyright 2009-2012 Guillaume Aubert.
+Copyright 2009-2013 Guillaume Aubert.
 
 This program is free software: you can redistribute it and/or modify it under
 the terms of the GNU General Public License version 3 as published by the Free

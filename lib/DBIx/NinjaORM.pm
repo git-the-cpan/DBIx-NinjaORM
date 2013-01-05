@@ -22,11 +22,11 @@ DBIx::NinjaORM - Flexible Perl ORM for easy transitions from inline SQL to objec
 
 =head1 VERSION
 
-Version 2.3.0
+Version 2.3.1
 
 =cut
 
-our $VERSION = '2.3.0';
+our $VERSION = '2.3.1';
 
 
 =head1 DESCRIPTION
@@ -755,10 +755,31 @@ sub retrieve_list_nocache ## no critic (Subroutines::ProhibitExcessComplexity)
 	$fields .= defined( $args{'query_extensions'}->{'joined_fields'} )
 		? ', ' . $args{'query_extensions'}->{'joined_fields'}
 		: '';
-	my $lock = $args{'lock'} ? 'FOR UPDATE' : '';
 	my $limit = defined( $args{'limit'} ) && ( $args{'limit'} =~ m/^\d+$/ )
 		? 'LIMIT ' . $args{'limit'}
 		: '';
+	
+	# We need to make an exception for lock=1 when using SQLite, since
+	# SQLite doesn't support FOR UPDATE.
+	# Per http://sqlite.org/cvstrac/wiki?p=UnsupportedSql, the entire
+	# database is locked when updating any bit of it, so we can simply
+	# ignore the locking request here.
+	my $lock = '';
+	if ( $args{'lock'} )
+	{
+		my $database_type = $dbh->{'Driver'}->{'Name'} || '';
+		if ( $database_type eq 'SQLite' )
+		{
+			$log->info(
+				'SQLite does not support locking since only one process at a time is ',
+				'allowed to update a given SQLite database, so lock=1 is ignored.',
+			);
+		}
+		else
+		{
+			$lock = 'FOR UPDATE';
+		}
+	}
 	
 	# Prepare quoted identifiers.
 	my $primary_key_name = $class->get_primary_key_name();
@@ -837,18 +858,38 @@ sub retrieve_list_nocache ## no critic (Subroutines::ProhibitExcessComplexity)
 		
 		my @query_values = map { @$_ } @$where_values;
 		$log->debugf(
-			"Performing query:\n%s\nValues:\n%s",
+			"Performing pre-locking query:\n%s\nValues:\n%s",
 			$query,
 			\@query_values,
 		) if $args{'show_queries'};
 		
-		my $locked_ids = $dbh->selectall_arrayref(
-			$query,
-			@query_values
-		);
+		my $locked_ids;
+		try
+		{
+			local $dbh->{'RaiseError'} = 1;
+			$locked_ids = $dbh->selectall_arrayref(
+				$query,
+				{
+					Columns => [ 1 ],
+				},
+				@query_values
+			);
+		}
+		catch
+		{
+			$log->fatalf(
+				"Could not select rows in pre-locking query: %s\nQuery: %s\nValues:\n%s",
+				$_,
+				$query,
+				\@query_values,
+			);
+			croak "Failed select: $_";
+		};
 		
-		return []
-			if !defined( $locked_ids ) || ( scalar( @$locked_ids ) == 0 );
+		if ( !defined( $locked_ids ) || ( scalar( @$locked_ids ) == 0 ) )
+		{
+			return [];
+		}
 		
 		$where = sprintf(
 			'WHERE %s.%s IN ( %s )',
@@ -856,7 +897,7 @@ sub retrieve_list_nocache ## no critic (Subroutines::ProhibitExcessComplexity)
 			$quoted_primary_key_name,
 			join( ', ', ( ('?') x scalar( @$locked_ids ) ) ),
 		);
-		$where_values = [ map { $_->[0] } @$locked_ids ];
+		$where_values = [ [ map { $_->[0] } @$locked_ids ] ];
 		$lock = '';
 	}
 	
@@ -3032,7 +3073,7 @@ Thanks to Jamie McCarthy for adding the 'ignore' argument to C<insert()>.
 
 =head1 COPYRIGHT & LICENSE
 
-Copyright 2009-2012 Guillaume Aubert.
+Copyright 2009-2013 Guillaume Aubert.
 
 This program is free software: you can redistribute it and/or modify it under
 the terms of the GNU General Public License version 3 as published by the Free
