@@ -10,7 +10,7 @@ use strict;
 use warnings;
 
 use Test::Exception;
-use Test::More tests => 5;
+use Test::More tests => 6;
 
 
 # Use time to make the test records unique, in case we need to run this test file
@@ -22,9 +22,9 @@ subtest(
 	'Insert test rows.',
 	sub
 	{
-		plan( tests => 15 );
+		plan( tests => 25 );
 		
-		foreach my $i ( 1 .. 15 )
+		foreach my $i ( 1 .. 25 )
 		{
 			my $test = DBIx::NinjaORM::Test->new();
 			lives_ok(
@@ -131,7 +131,7 @@ my $tests =
 		},
 	},
 	
-	# If no page is specified, this should default to page 1.
+	# If no number of results per page is specified, this should default to 20.
 	{
 		name     => 'Retrieve default page count.',
 		input    =>
@@ -155,6 +155,32 @@ my $tests =
 				'page_max'    => 1,
 				'per_page'    => 20,
 				'total_count' => 10,
+			},
+		},
+	},
+	
+	# We allow "pagination => 1" as a shortcut for the default pagination
+	# settings.
+	{
+		name     => 'Verify that the pagination=1 shortcut for default pagination settings is available.',
+		input    =>
+		[
+			{
+				name => [ map { "pagination_${time}_" . sprintf( '%02d', $_ ) } ( 1..25 ) ],
+			},
+			pagination => 1,
+			order_by   => 'name ASC',
+		],
+		expected =>
+		{
+			objects_count => 20,
+			object_names  => [ map { "pagination_${time}_" . sprintf( '%02d', $_ ) } ( 1..20 ) ],
+			pagination    =>
+			{
+				'page'        => 1,
+				'page_max'    => 2,
+				'per_page'    => 20,
+				'total_count' => 25,
 			},
 		},
 	},

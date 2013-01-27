@@ -46,7 +46,10 @@ t/223-insert-generated_primary_key_value.t
 t/224-insert-dbh.t
 t/225-insert-no_created_field.t
 t/226-insert-no_modified_field.t
+t/227-insert-dbi_failure.t
 t/230-id.t
+t/250-update.t
+t/255-update-dbi_failure.t
 t/290-get.t
 t/300-build_filtering_clause.t
 t/305-parse_filtering_criteria.t
@@ -65,6 +68,7 @@ t/345-retrieve_list-no_subclass.t
 t/350-retrieve_list-pagination.t
 t/370-invalidate_cached_object.t
 t/400-remove.t
+t/405-remove-dbi_failure.t
 t/415-commit.t
 t/500-flatten_object.t
 t/510-dump.t

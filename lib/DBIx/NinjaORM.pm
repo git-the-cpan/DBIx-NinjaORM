@@ -22,11 +22,11 @@ DBIx::NinjaORM - Flexible Perl ORM for easy transitions from inline SQL to objec
 
 =head1 VERSION
 
-Version 2.3.1
+Version 2.3.2
 
 =cut
 
-our $VERSION = '2.3.1';
+our $VERSION = '2.3.2';
 
 
 =head1 DESCRIPTION
@@ -258,9 +258,10 @@ sub commit
 	
 	if ( defined( $self->id() ) )
 	{
+		# If id() is defined, we have a value for the primary key name
+		# and we need to delete it from the data to update.
 		my $primary_key_name = $self->get_primary_key_name();
-		delete( $data->{ $primary_key_name } )
-			if exists( $data->{ $primary_key_name } );
+		delete( $data->{ $primary_key_name } );
 		
 		return $self->update( $data );
 	}
@@ -683,7 +684,7 @@ sub remove
 			$query,
 			\@query_values,
 		);
-		croak "Failed delete: $_";
+		croak "Remove failed: $_";
 	};
 	
 	return;
@@ -1347,7 +1348,6 @@ sub update ## no critic (Subroutines::RequireArgUnpacking)
 	my $where_values = $args{'restrictions'}->{'where_values'} || [];
 	push( @$where_clauses, $primary_key_name . ' = ?' );
 	push( @$where_values, [ $self->id() ] );
-	my $where = '( ' . join( ' ) AND ( ', @$where_clauses ) . ' )';
 	
 	# Prepare the values to set.
 	my @set_placeholders = ();
@@ -1363,16 +1363,16 @@ sub update ## no critic (Subroutines::RequireArgUnpacking)
 		push( @set_values, @{ $args{'set'}->{'values'} // [] } );
 	}
 	
-	my $set_placeholders = join( ', ', @set_placeholders );
-	
 	# Prepare the query elements.
 	my $query = sprintf(
 		qq|
 			UPDATE %s
-			SET $set_placeholders
-			WHERE $where
+			SET %s
+			WHERE %s
 		|,
 		$dbh->quote_identifier( $table_name ),
+		join( ', ', @set_placeholders ),
+		'( ' . join( ' ) AND ( ', @$where_clauses ) . ' )',
 	);
 	my @query_values =
 	(
@@ -1398,6 +1398,8 @@ sub update ## no critic (Subroutines::RequireArgUnpacking)
 			$query,
 			\@query_values,
 		);
+		
+		croak "Update failed: $_";
 	};
 	
 	# Also, if rows() returns -1, it's an error.
@@ -1793,6 +1795,18 @@ Set to '1' to see in the logs the queries being performed.
 		show_queries => 1,
 	);
 
+=item * allow_subclassing (default 0)
+
+By default, C<retrieve_list()> cannot be subclassed to prevent accidental
+infinite recursions and breaking the cache features provided by NinjaORM.
+Typically, if you want to add functionality to how retrieving a group of
+objects works, you will want to modify C<retrieve_list_nocache()> instead.
+
+If you really need to subclass C<retrieve_list()>, you will then need to
+set C<allow_subclassing> to C<1> in subclassed method's call to its parent,
+to indicate that you've carefully considered the impact of this and that it
+is safe.
+
 =back
 
 =cut
@@ -1800,16 +1814,20 @@ Set to '1' to see in the logs the queries being performed.
 sub retrieve_list
 {
 	my ( $class, $filters, %args ) = @_;
+	my $allow_subclassing = delete( $args{'allow_subclassing'} ) || 0;
 	
 	# Check caller and prevent calls from a subclass' retrieve_list().
-	my $subroutine = (caller(1))[3];
-	if ( defined( $subroutine ) )
+	if ( !$allow_subclassing )
 	{
-		$subroutine =~ s/^.*:://;
-		croak(
-			'You have subclassed retrieve_list(), which is not allowed to prevent infinite recursions. ' .
-			'You most likely want to subclass retrieve_list_nocache() instead.'
-		) if $subroutine eq 'retrieve_list';
+		my $subroutine = (caller(1))[3];
+		if ( defined( $subroutine ) )
+		{
+			$subroutine =~ s/^.*:://;
+			croak(
+				'You have subclassed retrieve_list(), which is not allowed to prevent infinite recursions. ' .
+				'You most likely want to subclass retrieve_list_nocache() instead.'
+			) if $subroutine eq 'retrieve_list';
+		}
 	}
 	
 	my $any_cache_time = $class->get_list_cache_time() || $class->get_object_cache_time();
