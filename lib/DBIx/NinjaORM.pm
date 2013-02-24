@@ -22,11 +22,11 @@ DBIx::NinjaORM - Flexible Perl ORM for easy transitions from inline SQL to objec
 
 =head1 VERSION
 
-Version 2.4.0
+Version 2.4.1
 
 =cut
 
-our $VERSION = '2.4.0';
+our $VERSION = '2.4.1';
 
 
 =head1 DESCRIPTION
@@ -1456,8 +1456,7 @@ sub validate_data
 	# Protect read-only fields.
 	foreach my $field ( @{ $self->get_readonly_fields() } )
 	{
-		next
-			unless defined( $data->{ $field } );
+		next if ! exists( $data->{ $field } );
 		
 		croak "The field '$field' is read-only and cannot be set via the model";
 	}
@@ -1465,9 +1464,12 @@ sub validate_data
 	# Don't allow setting timestamps.
 	foreach my $field ( qw( created modified ) )
 	{
-		croak "The field '$field' cannot be set and will be ignored"
-			if $self->is_verbose();
+		next if ! exists( $data->{ $field } );
 		
+		$log->warnf(
+			"The field '%s' cannot be set and will be ignored",
+			$field,
+		);
 		delete( $data->{ $field } );
 	}
 	
@@ -2375,7 +2377,8 @@ sub invalidate_cached_object
 			unique_field => 'id',
 			value        => $self->id(),
 		);
-		$self->delete_cache( key => $cache_key );
+		$self->delete_cache( key => $cache_key )
+			if defined( $cache_key );
 	}
 	
 	foreach my $field ( @{ $self->get_unique_fields() } )
@@ -2389,7 +2392,8 @@ sub invalidate_cached_object
 			unique_field => $field,
 			value        => $self->{ $field },
 		);
-		$self->delete_cache( key => $cache_key );
+		$self->delete_cache( key => $cache_key )
+			if defined( $cache_key );
 	}
 	
 	return 1;
