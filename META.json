@@ -51,13 +51,13 @@
    "provides" : {
       "DBIx::NinjaORM" : {
          "file" : "lib/DBIx/NinjaORM.pm",
-         "version" : "v2.4.1"
+         "version" : "v2.4.2"
       }
    },
    "release_status" : "stable",
    "resources" : {
       "bugtracker" : {
-         "web" : "http://rt.cpan.org/NoAuth/ReportBug.html?Queue=dbix-ninjaorm"
+         "web" : "https://github.com/guillaumeaubert/DBIx-NinjaORM/issues"
       },
       "homepage" : "https://metacpan.org/release/DBIx-NinjaORM",
       "license" : [
@@ -67,5 +67,5 @@
          "url" : "https://github.com/guillaumeaubert/DBIx-NinjaORM"
       }
    },
-   "version" : "v2.4.1"
+   "version" : "v2.4.2"
 }

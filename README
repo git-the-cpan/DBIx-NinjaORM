@@ -22,8 +22,8 @@ perldoc command.
 
 You can also look for information at:
 
-    RT, CPAN's request tracker (report bugs here)
-        http://rt.cpan.org/NoAuth/Bugs.html?Dist=DBIx-NinjaORM
+    GitHub's request tracker (report bugs here)
+        https://github.com/guillaumeaubert/DBIx-NinjaORM/issues
 
     AnnoCPAN, Annotated CPAN documentation
         http://annocpan.org/dist/DBIx-NinjaORM
@@ -31,8 +31,8 @@ You can also look for information at:
     CPAN Ratings
         http://cpanratings.perl.org/d/DBIx-NinjaORM
 
-    Search CPAN
-        http://search.cpan.org/dist/DBIx-NinjaORM/
+    MetaCPAN
+        https://metacpan.org/release/DBIx-NinjaORM
 
 
 LICENSE AND COPYRIGHT
