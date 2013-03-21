@@ -16,12 +16,13 @@ use DBIx::NinjaORM;
 use Test::Deep;
 use Test::Exception;
 use Test::More;
+use Test::NoWarnings qw();
 use Test::Type;
 
 
 # We must have memcache enabled for this test.
 LocalTest::ok_memcache();
-plan( tests => 10 );
+plan( tests => 11 );
 
 # Verify that the main class supports the method.
 can_ok(
@@ -128,6 +129,8 @@ is(
 	0,
 	'The object cache was not used.',
 ) || diag( explain( $object ) );
+
+Test::NoWarnings::had_no_warnings();
 
 
 # Test subclass with enough information to insert rows.

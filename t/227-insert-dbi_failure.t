@@ -12,7 +12,8 @@ use warnings;
 
 use DBIx::NinjaORM;
 use Test::Exception;
-use Test::More tests => 2;
+use Test::More tests => 3;
+use Test::NoWarnings;
 use Test::Type;
 
 
@@ -30,7 +31,7 @@ throws_ok(
 			}
 		);
 	},
-	qr/\AInsert failed: died in do()\E/,
+	qr/\A\QInsert failed: died in do()\E/,
 	'Caught insert failure.',
 );
 

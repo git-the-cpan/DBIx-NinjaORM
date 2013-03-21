@@ -26,8 +26,8 @@
             "Test::Deep" : "0",
             "Test::Exception" : "0",
             "Test::More" : "0.94",
-            "Test::Type" : "0",
-            "Try::Tiny" : "0"
+            "Test::NoWarnings" : "0",
+            "Test::Type" : "0"
          }
       },
       "configure" : {
@@ -44,6 +44,7 @@
             "Log::Any" : "0",
             "MIME::Base64" : "0",
             "Storable" : "0",
+            "Try::Tiny" : "0",
             "perl" : "5.01"
          }
       }
@@ -51,7 +52,7 @@
    "provides" : {
       "DBIx::NinjaORM" : {
          "file" : "lib/DBIx/NinjaORM.pm",
-         "version" : "v2.4.2"
+         "version" : "v2.4.3"
       }
    },
    "release_status" : "stable",
@@ -67,5 +68,5 @@
          "url" : "https://github.com/guillaumeaubert/DBIx-NinjaORM"
       }
    },
-   "version" : "v2.4.2"
+   "version" : "v2.4.3"
 }

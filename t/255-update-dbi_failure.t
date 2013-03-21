@@ -12,7 +12,8 @@ use warnings;
 
 use DBIx::NinjaORM;
 use Test::Exception;
-use Test::More tests => 2;
+use Test::More tests => 3;
+use Test::NoWarnings;
 use Test::Type;
 
 
@@ -55,7 +56,7 @@ throws_ok(
 			}
 		);
 	},
-	qr/\AUpdate failed: died in prepare()\E/,
+	qr/\A\QUpdate failed: died in prepare()\E/,
 	'Caught update failure.',
 );
 
