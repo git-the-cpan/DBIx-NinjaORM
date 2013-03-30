@@ -13,8 +13,8 @@ use warnings;
 use DBIx::NinjaORM;
 use Test::Deep;
 use Test::Exception;
-use Test::More tests => 6;
-use Test::NoWarnings;
+use Test::FailWarnings -allow_deps => 1;
+use Test::More tests => 5;
 
 
 # Verify that the main class supports the method.

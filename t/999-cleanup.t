@@ -9,8 +9,8 @@ Delete the SQLite database if it exists.
 use strict;
 use warnings;
 
-use Test::More tests => 2;
-use Test::NoWarnings;
+use Test::FailWarnings -allow_deps => 1;
+use Test::More tests => 1;
 
 
 SKIP:

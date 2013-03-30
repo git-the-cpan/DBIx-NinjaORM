@@ -22,11 +22,11 @@ DBIx::NinjaORM - Flexible Perl ORM for easy transitions from inline SQL to objec
 
 =head1 VERSION
 
-Version 2.4.3
+Version 2.4.4
 
 =cut
 
-our $VERSION = '2.4.3';
+our $VERSION = '2.4.4';
 
 
 =head1 DESCRIPTION
@@ -2287,7 +2287,6 @@ sub get_object_cache_key
 			$unique_field = $cache_key_field;
 			$value = $self->{ $unique_field };
 			
-			# See Trac #1695 for why we think this is significant.
 			unless ( defined( $value ) )
 			{
 				$log->debugf(

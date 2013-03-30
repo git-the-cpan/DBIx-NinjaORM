@@ -14,8 +14,8 @@ use LocalTest;
 
 use DBIx::NinjaORM;
 use Test::Exception;
-use Test::More tests => 6;
-use Test::NoWarnings;
+use Test::FailWarnings -allow_deps => 1;
+use Test::More tests => 5;
 
 
 # Make sure that assert_dbh() is supported by DBIx::NinjaORM.

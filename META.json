@@ -25,8 +25,8 @@
             "DBI" : "0",
             "Test::Deep" : "0",
             "Test::Exception" : "0",
+            "Test::FailWarnings" : "0",
             "Test::More" : "0.94",
-            "Test::NoWarnings" : "0",
             "Test::Type" : "0"
          }
       },
@@ -52,7 +52,7 @@
    "provides" : {
       "DBIx::NinjaORM" : {
          "file" : "lib/DBIx/NinjaORM.pm",
-         "version" : "v2.4.3"
+         "version" : "v2.4.4"
       }
    },
    "release_status" : "stable",
@@ -68,5 +68,5 @@
          "url" : "https://github.com/guillaumeaubert/DBIx-NinjaORM"
       }
    },
-   "version" : "v2.4.3"
+   "version" : "v2.4.4"
 }

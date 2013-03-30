@@ -13,8 +13,8 @@ use strict;
 use warnings;
 
 use Test::Exception;
-use Test::More tests => 5;
-use Test::NoWarnings;
+use Test::FailWarnings -allow_deps => 1;
+use Test::More tests => 4;
 
 
 # Verify that the main class supports the method.
