@@ -22,11 +22,11 @@ DBIx::NinjaORM - Flexible Perl ORM for easy transitions from inline SQL to objec
 
 =head1 VERSION
 
-Version 2.4.4
+Version 2.5.0
 
 =cut
 
-our $VERSION = '2.4.4';
+our $VERSION = '2.5.0';
 
 
 =head1 DESCRIPTION
@@ -1443,7 +1443,7 @@ operations.
 		\%data,
 	);
 
-	If there is invalid data, the method will croak with a detail of the error.
+If there is invalid data, the method will croak with a detail of the error.
 
 =cut
 
@@ -1678,6 +1678,41 @@ that hashref:
 			author_id => 12,
 		}
 	);
+
+Filters as discussed above, imply an equality between the field and the values. For instance, in the last example,
+the request could be written as "Please provide a list of books with author_id equal to 12, which also have an
+ISBN equal to 9781449313142 or an ISBN equal to 9781449393090".
+
+If you wish to request records using some other operator than equals, you can create a request similar to the following:
+
+	# Retrieve books for a specific author with ISBNs starting with a certain pattern.
+	my $books = My::Model::Book->retrieve_list(
+		{
+			isbn      =>
+			{
+				operator => 'like',
+				value => [ '9781%' ],
+			},
+			author_id => 12,
+		}
+	);
+
+The above example could be written as "Please provide a list of books with author_id equal to 12, which also have
+an ISBN starting with 9781".
+
+Valid operators include:
+
+	* =
+	* not
+	* <=
+	* >=
+	* <
+	* >
+	* between
+	* null
+	* not_null
+	* like
+	* not_like
 
 This method also supports the following optional arguments, passed in a hash
 after the filtering criteria above-mentioned:
@@ -2852,6 +2887,20 @@ sub build_filtering_clause
 				croak 'Could not find min of the following list: ' . Dumper( $values );
 			}
 		}
+		elsif ( $operator eq 'like' )
+		{
+			# Permit more than one like clause on the same field.
+			$clause = "$quoted_field LIKE ? OR " x scalar @{ $values };
+			$clause = substr( $clause, 0, -4 );
+			$clause_values = $values;
+		}
+		elsif ( $operator eq 'not_like' )
+		{
+			# Permit more than one like clause on the same field.
+			$clause = "$quoted_field NOT LIKE ? AND " x scalar @{ $values };
+			$clause = substr( $clause, 0, -5 );
+			$clause_values = $values;
+		}
 		# Only one value passed.
 		else
 		{
@@ -2980,7 +3029,7 @@ sub parse_filtering_criteria
 				{
 					croak 'The operator is missing or not defined';
 				}
-				elsif ( $block->{'operator'} !~ m/^(?:=|not|<=|>=|<|>|between|null|not_null)$/x )
+				elsif ( $block->{'operator'} !~ m/^(?:=|not|<=|>=|<|>|between|null|not_null|like|not_like)$/x )
 				{
 					croak "The operator '$block->{'operator'}' is not a valid one. Try (=|not|<=|>=|<|>)";
 				}
