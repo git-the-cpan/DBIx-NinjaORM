@@ -22,26 +22,18 @@ DBIx::NinjaORM - Flexible Perl ORM for easy transitions from inline SQL to objec
 
 =head1 VERSION
 
-Version 2.5.0
+Version 2.5.1
 
 =cut
 
-our $VERSION = '2.5.0';
+our $VERSION = '2.5.1';
 
 
 =head1 DESCRIPTION
 
-Caveat: if you're starting a new project, L<DBIx::NinjaORM> is probably not the
-right ORM to use. Look instead at L<DBIx::Class> for example, which has a more
-abstract model and can leverage a nicely normalized database schema.
-
 L<DBIx::NinjaORM> was designed with a few goals in mind:
 
 =over 4
-
-=item *
-
-Allow a progressive introduction of a separate Model layer in a legacy codebase.
 
 =item *
 
@@ -51,6 +43,14 @@ prevent lazy-loading of ancillary information.
 =item *
 
 Have a short learning curve.
+
+=item *
+
+Provide advanced caching features and manage cache expiration upon database changes.
+
+=item *
+
+Allow a progressive introduction of a separate Model layer in a legacy codebase.
 
 =back
 
@@ -745,7 +745,9 @@ sub retrieve_list_nocache ## no critic (Subroutines::ProhibitExcessComplexity)
 	my $table_name = $class->get_table_name();
 	my $order_by = defined( $args{'order_by'} ) && ( $args{'order_by'} ne '' )
 		? "ORDER BY $args{'order_by'}"
-		: "ORDER BY " . $dbh->quote_identifier( $table_name ) . ".created ASC";
+		: $class->has_created_field()
+			? "ORDER BY " . $dbh->quote_identifier( $table_name ) . ".created ASC"
+			: "ORDER BY " . $dbh->quote_identifier( $table_name ) . '.' . $class->get_primary_key_name();
 	
 	# Prepare the SQL request elements.
 	my $where = scalar( @$where_clauses ) != 0
@@ -1787,17 +1789,42 @@ A string of extra fields to add to the SELECT.
 =item * pagination
 
 Off by default. Paginate the results. You can control the pagination options
-by setting it to the following hashref:
+by setting this to the following hash, with each key being optional and falling
+back to the default if you omit it:
 
-	{
-		total_count => $total_count,
-		page        => $page,
-		page_max    => $page_max,
-		per_page    => $per_page,
-	}
+	my $books = My::Model::Book->retrieve_list(
+		{},
+		allow_all  => 1,
+		pagination =>
+		{
+			# The number of results to retrieve.
+			per_page    => $per_page,
+			# Number of the page of results to retrieve. If you have per_page=10
+			# and page=2, then this would retrieve rows 10-19 from the set of
+			# matching rows.
+			page        => $page,
+		}
+	);
 
 Additionally, pagination can be set to '1' instead of {} and then the default
 options will be used.
+
+More pagination information is then returned in list context:
+
+	my ( $books, $pagination ) = My::Model::Book->retrieve_list( ... );
+
+With the following pagination information inside C<$pagination>:
+
+	{
+		# The total number of rows matching the query.
+		total_count => $total_count,
+		# The current page being returned.
+		page        => $page,
+		# The total number of pages to display the matching rows.
+		page_max    => $page_max,
+		# The number of rows displayed per page.
+		per_page    => $per_page,
+	}
 
 =item * lock (default 0)
 
