@@ -10,6 +10,7 @@ build_requires:
   Test::FailWarnings: 0
   Test::More: 0.94
   Test::Type: 0
+  Test::Warn: 0
 configure_requires:
   Module::Build: 0
 dynamic_config: 1
@@ -22,12 +23,22 @@ name: DBIx-NinjaORM
 no_index:
   file:
     - t/lib/LocalTest.pm
+  namespace:
+    - TestSubclass
 provides:
   DBIx::NinjaORM:
     file: lib/DBIx/NinjaORM.pm
-    version: v2.5.1
+    version: v3.0.0
+  DBIx::NinjaORM::Schema::Table:
+    file: lib/DBIx/NinjaORM/Schema/Table.pm
+    version: v3.0.0
+  DBIx::NinjaORM::StaticClassInfo:
+    file: lib/DBIx/NinjaORM/StaticClassInfo.pm
+    version: v3.0.0
 requires:
   Carp: 0
+  Class::Load: 0
+  DBIx::Inspector: 0
   Data::Dumper: 0
   Data::Validate::Type: 0
   Digest::SHA1: 0
@@ -41,4 +52,4 @@ resources:
   homepage: https://metacpan.org/release/DBIx-NinjaORM
   license: http://www.gnu.org/licenses/gpl-3.0.txt
   repository: https://github.com/guillaumeaubert/DBIx-NinjaORM
-version: v2.5.1
+version: v3.0.0

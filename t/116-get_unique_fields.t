@@ -10,11 +10,14 @@ specified in the static class information.
 use strict;
 use warnings;
 
+use lib 't/lib';
+
 use DBIx::NinjaORM;
 use Test::Deep;
-use Test::Exception;
 use Test::FailWarnings -allow_deps => 1;
 use Test::More tests => 5;
+use Test::Warn;
+use TestSubclass::Accessors;
 
 
 # Verify that the main class supports the method.
@@ -25,7 +28,7 @@ can_ok(
 
 # Verify inheritance.
 can_ok(
-	'DBIx::NinjaORM::Test',
+	'TestSubclass::Accessors',
 	'get_unique_fields',
 );
 
@@ -38,13 +41,13 @@ my $tests =
 		expected => [],
 	},
 	{
-		name     => 'Test calling get_unique_fields() on DBIx::NinjaORM::Test',
-		ref      => 'DBIx::NinjaORM::Test',
+		name     => 'Test calling get_unique_fields() on TestSubclass::Accessors',
+		ref      => 'TestSubclass::Accessors',
 		expected => [ 'test' ],
 	},
 	{
 		name     => 'Test calling get_unique_fields() on an object',
-		ref      => bless( {}, 'DBIx::NinjaORM::Test' ),
+		ref      => bless( {}, 'TestSubclass::Accessors' ),
 		expected => [ 'test' ],
 	},
 ];
@@ -59,12 +62,13 @@ foreach my $test ( @$tests )
 			plan( tests => 2 );
 			
 			my $unique_fields;
-			lives_ok(
+			warning_like(
 				sub
 				{
 					$unique_fields = $test->{'ref'}->get_unique_fields();
 				},
-				'Retrieve the list cache time.',
+				{ carped => qr/has been deprecated/ },
+				'The method is deprecated.',
 			);
 			
 			is_deeply(
@@ -75,23 +79,3 @@ foreach my $test ( @$tests )
 		}
 	);
 }
-
-
-# Test subclass with 'unique_fields' set.
-package DBIx::NinjaORM::Test;
-
-use strict;
-use warnings;
-
-use base 'DBIx::NinjaORM';
-
-
-sub static_class_info
-{
-	return
-	{
-		'unique_fields' => [ 'test' ],
-	};
-}
-
-1;

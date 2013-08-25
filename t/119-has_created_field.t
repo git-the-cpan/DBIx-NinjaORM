@@ -11,9 +11,9 @@ use strict;
 use warnings;
 
 use DBIx::NinjaORM;
-use Test::Exception;
 use Test::FailWarnings -allow_deps => 1;
 use Test::More tests => 8;
+use Test::Warn;
 
 
 # Verify that the main class supports the method.
@@ -72,12 +72,13 @@ foreach my $test ( @$tests )
 			plan( tests => 2 );
 			
 			my $created_field;
-			lives_ok(
+			warning_like(
 				sub
 				{
 					$created_field = $test->{'ref'}->has_created_field();
 				},
-				'Retrieve the list cache time.',
+				{ carped => qr/has been deprecated/ },
+				'The method is deprecated.',
 			);
 			
 			is(
@@ -101,10 +102,17 @@ use base 'DBIx::NinjaORM';
 
 sub static_class_info
 {
-	return
-	{
-		'has_created_field' => 1,
-	};
+	my ( $class ) = @_;
+	
+	my $info = $class->SUPER::static_class_info();
+	
+	$info->set(
+		{
+			'has_created_field' => 1,
+		}
+	);
+	
+	return $info;
 }
 
 1;
@@ -121,10 +129,17 @@ use base 'DBIx::NinjaORM';
 
 sub static_class_info
 {
-	return
-	{
-		'has_created_field' => 0,
-	};
+	my ( $class ) = @_;
+	
+	my $info = $class->SUPER::static_class_info();
+	
+	$info->set(
+		{
+			'has_created_field' => 0,
+		}
+	);
+	
+	return $info;
 }
 
 1;

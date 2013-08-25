@@ -45,14 +45,16 @@ my $builder = $class->new(
 		'DBI'                  => 0,
 		'Test::Deep'           => 0,
 		'Test::Exception'      => 0,
-		'Test::More'           => 0.94, # subtest()
 		'Test::FailWarnings'   => 0,
+		'Test::More'           => 0.94, # subtest()
 		'Test::Type'           => 0,
+		'Test::Warn'           => 0,
 	},
 	requires             =>
 	{
-		'perl'                 => 5.010,
 		'Carp'                 => 0,
+		'Class::Load'          => 0,
+		'DBIx::Inspector'      => 0,
 		'Data::Dumper'         => 0,
 		'Data::Validate::Type' => 0,
 		'Digest::SHA1'         => 0,
@@ -60,6 +62,7 @@ my $builder = $class->new(
 		'MIME::Base64'         => 0,
 		'Storable'             => 0,
 		'Try::Tiny'            => 0,
+		'perl'                 => 5.010,
 	},
 	add_to_cleanup       =>
 	[
@@ -84,6 +87,10 @@ my $builder = $class->new(
 			[
 				't/lib/LocalTest.pm',
 			],
+			namespace   =>
+			[
+				'TestSubclass',
+			]
 		},
 	},
 	recursive_test_files => 1,

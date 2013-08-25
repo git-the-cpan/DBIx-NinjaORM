@@ -9,12 +9,15 @@ Test the flatten_object() method.
 use strict;
 use warnings;
 
+use lib 't/lib';
+
 use DBIx::NinjaORM;
 use Test::Deep;
 use Test::Exception;
 use Test::FailWarnings -allow_deps => 1;
-use Test::More tests => 7;
+use Test::More tests => 8;
 use Test::Type;
+use TestSubclass::TestTable;
 
 
 # Verify that the main class supports the method.
@@ -25,7 +28,7 @@ can_ok(
 
 # Verify inheritance.
 can_ok(
-	'DBIx::NinjaORM::Test',
+	'TestSubclass::TestTable',
 	'flatten_object',
 );
 
@@ -39,7 +42,7 @@ subtest(
 		
 		ok(
 			defined(
-				my $object = DBIx::NinjaORM::Test->new()
+				my $object = TestSubclass::TestTable->new()
 			),
 			'Create new object.',
 		);
@@ -69,7 +72,7 @@ subtest(
 # Retrieve object.
 ok(
 	defined(
-		my $object = DBIx::NinjaORM::Test->new(
+		my $object = TestSubclass::TestTable->new(
 			{ id => $object_id },
 		)
 	),
@@ -77,7 +80,7 @@ ok(
 );
 
 # List of keys to flatten.
-my $flatten_keys = 
+my $flatten_keys =
 [
 	qw(
 		name
@@ -86,52 +89,86 @@ my $flatten_keys =
 ];
 
 # Flatten.
-my $flattened_object;
-lives_ok(
+subtest(
+	'Flatten regular fields.',
 	sub
 	{
-		$flattened_object = $object->flatten_object(
-			$flatten_keys
+		plan( tests => 3 );
+		
+		my $flattened_object;
+		lives_ok(
+			sub
+			{
+				$flattened_object = $object->flatten_object(
+					$flatten_keys
+				);
+			},
+			'Flatten the object.',
+		);
+		
+		ok_hashref(
+			$flattened_object,
+			name => 'The flattened object.',
+		);
+		
+		cmp_deeply(
+			[ sort keys %$flattened_object ],
+			$flatten_keys,
+			'The output of flatten() matches the requested fields.',
+		);
+	}
+);
+
+throws_ok(
+	sub
+	{
+		$object->flatten_object(
+			[ 'password' ],
 		);
 	},
-	'Flatten the object.',
+	qr/The fields 'password' is protected and cannot be added to the flattened copy/,
+	'Cannot flatten protected fields.',
 );
 
-ok_hashref(
-	$flattened_object,
-	name => 'The flattened object.',
+throws_ok(
+	sub
+	{
+		$object->flatten_object(
+			[ '_test' ],
+		);
+	},
+	qr/The field '_test' is hidden and cannot be added to the flattened copy/,
+	'Cannot flatten private fields.',
 );
 
-cmp_deeply(
-	[ sort keys %$flattened_object ],
-	$flatten_keys,
-	'The output of flatten() matches the requested fields.',
+subtest(
+	'Flatten the ID field using the "id" shortcut.',
+	sub
+	{
+		plan( tests => 3 );
+		
+		my $flattened_object;
+		lives_ok(
+			sub
+			{
+				$flattened_object = $object->flatten_object(
+					[ 'id' ],
+				);
+			},
+			'Flatten the object.',
+		);
+		
+		ok_hashref(
+			$flattened_object,
+			name => 'The flattened object.',
+		);
+		
+		cmp_deeply(
+			$flattened_object,
+			{
+				id => $object->id(),
+			},
+			'The output of flatten() matches the requested fields.',
+		);
+	}
 );
-
-
-# Test subclass with enough information to insert rows.
-package DBIx::NinjaORM::Test;
-
-use strict;
-use warnings;
-
-use lib 't/lib';
-use LocalTest;
-
-use base 'DBIx::NinjaORM';
-
-
-sub static_class_info
-{
-	my ( $class ) = @_;
-	
-	my $info = $class->SUPER::static_class_info();
-	
-	$info->{'default_dbh'} = LocalTest::get_database_handle();
-	$info->{'table_name'} = 'tests';
-	$info->{'primary_key_name'} = 'test_id';
-	
-	return $info;
-}
-
-1;

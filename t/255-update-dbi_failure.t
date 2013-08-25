@@ -10,11 +10,14 @@ DBIx::NinjaORM->update() are caught and propagated properly.
 use strict;
 use warnings;
 
+use lib 't/lib';
+
 use DBIx::NinjaORM;
 use Test::Exception;
 use Test::FailWarnings -allow_deps => 1;
 use Test::More tests => 2;
 use Test::Type;
+use TestSubclass::TestTable;
 
 
 # Insert a test object.
@@ -24,7 +27,7 @@ subtest(
 	sub
 	{
 		ok(
-			$object = DBIx::NinjaORM::Test->new(),
+			$object = TestSubclass::TestTable->new(),
 			'Create new object.',
 		);
 		
@@ -44,7 +47,7 @@ subtest(
 
 # Re-bless the database connection as a DBI::db::Test object, which is the
 # same as DBI::db except that it overrides prepare() to make it die.
-my $dbh = $object->get_default_dbh();
+my $dbh = $object->get_info('default_dbh');
 bless( $dbh, 'DBI::db::Test' );
 
 throws_ok(
@@ -59,33 +62,6 @@ throws_ok(
 	qr/\A\QUpdate failed: died in prepare()\E/,
 	'Caught update failure.',
 );
-
-
-# Test subclass with enough information to insert rows.
-package DBIx::NinjaORM::Test;
-
-use strict;
-use warnings;
-
-use lib 't/lib';
-use LocalTest;
-
-use base 'DBIx::NinjaORM';
-
-sub static_class_info
-{
-	my ( $class ) = @_;
-	
-	my $info = $class->SUPER::static_class_info();
-	
-	$info->{'default_dbh'} = LocalTest::get_database_handle();
-	$info->{'table_name'} = 'tests';
-	$info->{'primary_key_name'} = 'test_id';
-	
-	return $info;
-}
-
-1;
 
 
 # Subclass DBI::db and override prepare() to make it die.

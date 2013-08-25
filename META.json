@@ -16,6 +16,9 @@
    "no_index" : {
       "file" : [
          "t/lib/LocalTest.pm"
+      ],
+      "namespace" : [
+         "TestSubclass"
       ]
    },
    "prereqs" : {
@@ -27,7 +30,8 @@
             "Test::Exception" : "0",
             "Test::FailWarnings" : "0",
             "Test::More" : "0.94",
-            "Test::Type" : "0"
+            "Test::Type" : "0",
+            "Test::Warn" : "0"
          }
       },
       "configure" : {
@@ -38,6 +42,8 @@
       "runtime" : {
          "requires" : {
             "Carp" : "0",
+            "Class::Load" : "0",
+            "DBIx::Inspector" : "0",
             "Data::Dumper" : "0",
             "Data::Validate::Type" : "0",
             "Digest::SHA1" : "0",
@@ -52,7 +58,15 @@
    "provides" : {
       "DBIx::NinjaORM" : {
          "file" : "lib/DBIx/NinjaORM.pm",
-         "version" : "v2.5.1"
+         "version" : "v3.0.0"
+      },
+      "DBIx::NinjaORM::Schema::Table" : {
+         "file" : "lib/DBIx/NinjaORM/Schema/Table.pm",
+         "version" : "v3.0.0"
+      },
+      "DBIx::NinjaORM::StaticClassInfo" : {
+         "file" : "lib/DBIx/NinjaORM/StaticClassInfo.pm",
+         "version" : "v3.0.0"
       }
    },
    "release_status" : "stable",
@@ -68,5 +82,5 @@
          "url" : "https://github.com/guillaumeaubert/DBIx-NinjaORM"
       }
    },
-   "version" : "v2.5.1"
+   "version" : "v3.0.0"
 }

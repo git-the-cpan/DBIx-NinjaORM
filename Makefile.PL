@@ -7,8 +7,10 @@ WriteMakefile
           'VERSION_FROM' => 'lib/DBIx/NinjaORM.pm',
           'PREREQ_PM' => {
                            'Carp' => 0,
+                           'Class::Load' => 0,
                            'DBD::SQLite' => 0,
                            'DBI' => 0,
+                           'DBIx::Inspector' => 0,
                            'Data::Dumper' => 0,
                            'Data::Validate::Type' => 0,
                            'Digest::SHA1' => 0,
@@ -20,13 +22,14 @@ WriteMakefile
                            'Test::FailWarnings' => 0,
                            'Test::More' => '0.94',
                            'Test::Type' => 0,
+                           'Test::Warn' => 0,
                            'Try::Tiny' => 0
                          },
           'INSTALLDIRS' => 'site',
           'EXE_FILES' => [],
           'PL_FILES' => {},
           'test' => {
-                      'TESTS' => 't/*.t t/lib/*.t t/010-LocalTest/*.t t/SQL/*.t'
+                      'TESTS' => 't/*.t t/030-Schema-Table/*.t t/lib/*.t t/lib/TestSubclass/*.t t/050-StaticClassInfo/*.t t/010-LocalTest/*.t t/SQL/*.t'
                     }
         )
 ;
