@@ -16,11 +16,11 @@ TestSubclass::Memcache - Test subclass with a memcache object.
 
 =head1 VERSION
 
-Version 3.0.1
+Version 3.0.2
 
 =cut
 
-our $VERSION = '3.0.1';
+our $VERSION = '3.0.2';
 
 
 =head1 SYNOPSIS
@@ -45,15 +45,15 @@ Configure static class information.
 sub static_class_info
 {
 	my ( $class ) = @_;
-	
+
 	my $info = $class->SUPER::static_class_info();
-	
+
 	$info->set(
 		{
 			'memcache' => LocalTest::get_memcache(),
 		}
 	);
-	
+
 	return $info;
 }
 

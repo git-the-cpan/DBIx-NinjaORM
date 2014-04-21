@@ -14,11 +14,11 @@ DBIx::NinjaORM::Schema::Table - Store information about a table used by L<DBIx::
 
 =head1 VERSION
 
-Version 3.0.1
+Version 3.0.2
 
 =cut
 
-our $VERSION = '3.0.1';
+our $VERSION = '3.0.2';
 
 
 =head1 DESCRIPTION
@@ -36,7 +36,7 @@ replace the dependencies and internals later if needed.
 		dbh  => $dbh,
 		name => $name,
 	);
-	
+
 	my $column_names = $table_schema->get_column_names();
 
 
@@ -74,13 +74,13 @@ sub new
 	my $dbh = delete( $args{'dbh'} );
 	croak 'The following arguments are not valid: ' . join( ', ', keys %args )
 		if scalar( keys %args ) != 0;
-	
+
 	# Check for the mandatory parameters.
 	croak 'The argument "name" is mandatory'
 		if !defined( $name );
 	croak 'The argument "dbh" is mandatory'
 		if !defined( $dbh );
-	
+
 	# Return a blessed object.
 	return bless(
 		{
@@ -103,7 +103,7 @@ Return the table name.
 sub get_name
 {
 	my ( $self ) = @_;
-	
+
 	return $self->{'name'};
 }
 
@@ -119,7 +119,7 @@ Return the database handle associated with the table.
 sub get_dbh
 {
 	my ( $self ) = @_;
-	
+
 	return $self->{'dbh'};
 }
 
@@ -135,9 +135,9 @@ Return the name of the columns that exist in the underlying table.
 sub get_column_names
 {
 	my ( $self ) = @_;
-	
+
 	my $columns = $self->get_columns();
-	
+
 	return [ map { $_->name() } @$columns ];
 }
 
@@ -159,14 +159,14 @@ Return a cached L<DBIx::Inspector object>.
 sub get_inspector
 {
 	my ( $self ) = @_;
-	
+
 	if ( !defined( $self->{'inspector'} ) )
 	{
 			$self->{'inspector'} = DBIx::Inspector->new( dbh => $self->get_dbh() );
 			croak 'Failed to create the DBIx::Inspector object'
 				if !defined( $self->{'inspector'} );
 	}
-	
+
 	return $self->{'inspector'};
 }
 
@@ -183,18 +183,18 @@ underlying table.
 sub get_table
 {
 	my ( $self ) = @_;
-	
+
 	if ( !defined( $self->{'table'} ) )
 	{
 		my $inspector = $self->get_inspector();
 		$self->{'table'} = $inspector->table(
 			$self->get_name()
 		);
-		
+
 		croak 'Failed to retrieve the table object'
 			if !defined( $self->{'table'} );
 	}
-	
+
 	return $self->{'table'};
 }
 
@@ -210,13 +210,13 @@ to the columns of the underlying table.
 sub get_columns
 {
 	my ( $self ) = @_;
-	
+
 	if ( !defined( $self->{'columns'} ) )
 	{
 		my $table = $self->get_table();
 		$self->{'columns'} = [ $table->columns() ];
 	}
-	
+
 	return $self->{'columns'};
 }
 
@@ -266,7 +266,7 @@ Guillaume Aubert, C<< <aubertg at cpan.org> >>.
 
 =head1 COPYRIGHT & LICENSE
 
-Copyright 2009-2013 Guillaume Aubert.
+Copyright 2009-2014 Guillaume Aubert.
 
 This program is free software: you can redistribute it and/or modify it under
 the terms of the GNU General Public License version 3 as published by the Free
